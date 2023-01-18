@@ -13,33 +13,15 @@ from utils.st4sd_api_helper import get_authorization_headers
 
 api = Namespace('experiments', description='Experiment-related operations')
 
-
 @api.route('/')
 class PVEPList(Resource):
     @api.doc('get_pveps')
     def get(self):
         """Get all PVEPS"""
         authorization_headers = get_authorization_headers()
-        response = requests.get(
-            f"{settings.runtime_service_endpoint}experiments/", headers=authorization_headers)
+        response = requests.get(f"{settings.runtime_service_endpoint}experiments/", headers=authorization_headers)
         assert response.status_code == 200, f"Response code was {response.status_code}"
-
-        search_query = request.args.get("searchQuery")
-        search_selector = request.args.get("searchSelector")
-
-        # No query
-        if search_query is None and search_selector is None:
-            return jsonify(response.json())
-
-        # Handle search
-        experiments_matching_query = []
-        search_query_lower = search_query.lower()
-        search_selector_lower = search_selector.lower()
-        for exp in response.json()["entries"]:
-            if search_selector_lower in exp["metadata"]["package"]:
-                if search_query_lower in exp["metadata"]["package"][search_selector_lower].lower():
-                    experiments_matching_query.append(exp)
-        return jsonify(experiments_matching_query)
+        return jsonify(response.json())
 
 
 @api.route("/<pvep>")
@@ -50,12 +32,10 @@ class PVEP(Resource):
         """Get a PVEP"""
         authorization_headers = get_authorization_headers()
         if request.query_string is None:
-            response = requests.get(
-                f"{settings.runtime_service_endpoint}experiments/{pvep}", headers=authorization_headers)
+            response = requests.get(f"{settings.runtime_service_endpoint}experiments/{pvep}", headers=authorization_headers)
         else:
             query_string = bytes.decode(request.query_string)
-            response = requests.get(
-                f"{settings.runtime_service_endpoint}experiments/{pvep}?{query_string}", headers=authorization_headers)
+            response = requests.get(f"{settings.runtime_service_endpoint}experiments/{pvep}?{query_string}", headers=authorization_headers)
         assert response.status_code == 200, f"Response code was {response.status_code}"
         return jsonify(response.json())
 
@@ -67,7 +47,6 @@ class PVEPHistory(Resource):
     def get(self, pvep: str):
         """Get the history of a PVEP"""
         authorization_headers = get_authorization_headers()
-        response = requests.get(
-            f"{settings.runtime_service_endpoint}experiments/{pvep}/history", headers=authorization_headers)
+        response = requests.get(f"{settings.runtime_service_endpoint}experiments/{pvep}/history", headers=authorization_headers)
         assert response.status_code == 200, f"Response code was {response.status_code}"
         return jsonify(response.json())
